@@ -1,2 +1,3 @@
 node_modules
-./public/helpers/serviceAccountKey.json
+serviceAccountKey.json
+.gitignore

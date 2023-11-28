@@ -1,5 +1,5 @@
 const admin = require("firebase-admin");
-const serviceAccount = require("../helpers/serviceAccountKey.json");
+const serviceAccount = require("../../serviceAccountKey.json");
 const cron = require("node-cron");
 const {
   calculateAverage,
