@@ -3,6 +3,7 @@ const MainController = require("./public/controllers/mainController");
 const app = express();
 const path = require('path');
 const cors = require('cors');
+const { Module } = require("module");
 
 // Static file serving middleware
 app.use(express.static(path.join(__dirname, 'public')));
@@ -35,6 +36,9 @@ app.get("/getDataFromRealtime", MainController.fetchRealtimeData);
 
 // Retrieving Average Data From FireStore Database
 app.get("/getAverageData", MainController.getAvgData);
+
+// Retrieving Average Data From FireStore Database
+app.get("/getWeeklyAverageData", MainController.getWeeklyAvgData);
 
 const port = 3000;
 app.listen(port, () => {

@@ -64,6 +64,36 @@ const MainModel = {
     }
   },
 
+  // Resetting firestore weekly and getting the average data over a week
+  resetFirestoreWeekly: async () => {
+    try {
+      const snapshot = await firestore.collection("averageData").get();
+      const updatedData = snapshot.docs.map((doc) => {
+        return { id: doc.id, ...doc.data() };
+      });
+
+      // Get the last updated data into cachedData
+      cachedData = updatedData;
+
+      // Calculate average values
+      const avgValues = calculateAverage(updatedData);
+
+      // Store average values in the averageData collection
+      await firestore.collection("weeklyAverage").add({
+        averages: avgValues,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      console.log(cachedData);
+      // cachedData = []
+
+      // Reset the updatedData collection
+      await resetCollection("averageData");
+
+      console.log("Weekly Firestore reset and average values stored successfully!");
+    } catch (error) {
+      console.error("Error resetting data:", error);
+    }
+  },
   // Updates for every 30 mins
   scheduleUpdate: () => {
     cron.schedule("*/30 * * * *", async () => {
@@ -71,11 +101,19 @@ const MainModel = {
     });
   },
 
-  // Reset for every 12 hours
+  // Reset for every day midnight
   scheduleReset: () => {
-    cron.schedule("0 */12 * * *", async () => {
+    cron.schedule("0 0 * * *", async () => {
       // After updating, perform the reset
       await MainModel.resetFirestore();
+    });
+  },
+
+  //Reset for every sunday midnight
+  scheduleResetWeekly: () => {
+    cron.schedule("0 0 * * 7", async () => {
+      // After updating, perform the reset
+      await MainModel.resetFirestoreWeekly();
     });
   },
 
@@ -129,6 +167,20 @@ const MainModel = {
       throw error;
     }
   },
+
+  getWeeklyAverageData: async () => {
+    try {
+      const snapshot = await firestore.collection("weeklyAverage").get();
+      const WeeklyAverageData = snapshot.docs.map((doc) => {
+        return { id: doc.id, ...doc.data() };
+      });
+
+      return WeeklyAverageData;
+    } catch (error) {
+      console.error("Error retrieving average data:", error);
+      throw error;
+    }
+  },
 };
 
 // Scheduling the update task when the application starts
@@ -136,5 +188,8 @@ MainModel.scheduleUpdate();
 
 // Schedule the reset task when the application starts
 MainModel.scheduleReset();
+
+// Schedule the reset task when the application starts
+MainModel.scheduleResetWeekly();
 
 module.exports = MainModel;

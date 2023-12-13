@@ -29,6 +29,15 @@ const MainController = {
       MainView.sendError(res, 500, "Internal Server Error");
     }
   },
+
+  getWeeklyAvgData: async (req, res) => {
+    try {
+      const WeeklyAvgData = await MainModel.getWeeklyAverageData();
+      MainView.sendJsonResponse(res, WeeklyAvgData);
+    } catch (error) {
+      MainView.sendError(res, 500, "Internal Server Error");
+    }
+  },
 };
 
 module.exports = MainController;
